@@ -137,6 +137,10 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -157,6 +161,7 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs">
@@ -701,7 +706,9 @@
     <Compile Include="Functions\FunctionAggrArray.cs" />
     <Compile Include="GraphicsExtended.cs" />
     <Compile Include="RDLBaseEBN.cs" />
+    <Compile Include="Render\OpenXmlWriterHelper.cs" />
     <Compile Include="Render\RenderBase.cs" />
+    <Compile Include="Render\RenderSpreadSheetDocument_OpenXmlSdk.cs" />
     <Compile Include="Render\RenderPdf_iTextSharp.cs" />
     <Compile Include="Resources\Strings.Designer.cs">
       <AutoGen>True</AutoGen>

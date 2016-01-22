@@ -37,7 +37,8 @@ namespace fyiReporting.RDL
 	{
 		HTML,
         RenderPdf_iTextSharp,
-		PDF,
+        RenderSpreadSheetDocument_OpenXmlSdk,
+        PDF,
         PDFOldStyle,
 		XML,
 		ASPHTML,

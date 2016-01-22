@@ -307,6 +307,384 @@ namespace fyiReporting.RDL
                 _contentByte.ClosePathFillStroke();
         }
 
+        protected internal override void AddText(PageText pt, Pages pgs)
+        {
+
+            BaseFont bf;
+            float width = pt.W;
+            float height = pt.H;
+
+            float[] tw;
+            string[] sa = Measurement.MeasureString(pt, pgs.G, out tw);
+
+            string face = iFontNameNormalize(pt.SI.FontFamily);
+            string fontname = "";
+            bool fonttype1 = true;
+            var folder = FontFolder; //Call to determine folder and set value of _dejavuFonts;
+            if (face == "Times-Roman")
+            {
+                if (pt.SI.IsFontBold() && pt.SI.FontStyle == FontStyleEnum.Italic)
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "TimesNewRomanPS-BoldItalicMT";
+                        fontname = "Times New Roman Bold Italic.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Serif Condensed Bold Italic" : "Times-BoldItalic";
+                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed-BoldItalic.ttf" : "timesbi.ttf");
+                    }
+                }
+                else if (pt.SI.IsFontBold())
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "TimesNewRomanPS-BoldMT";
+                        fontname = "Times New Roman Bold.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Serif Condensed Bold" : "Times-Bold";
+                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed-Bold.ttf" : "timesbd.ttf");
+                    }
+                }
+                else if (pt.SI.FontStyle == FontStyleEnum.Italic)
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "TimesNewRomanPS-ItalicMT";
+                        fontname = "Times New Roman Italic.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Serif Condensed Italic" : "Times-Italic";
+                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed-Italic.ttf" : "timesi.ttf");
+                    }
+                }
+                else {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "TimesNewRomanPSMT";
+                        fontname = "Times New Roman.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Serif Condensed" : face;
+                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed.ttf" : "times.ttf");
+                    }
+                }
+                fonttype1 = false;
+            }
+            else if (face == "Arial")
+            {
+                if (pt.SI.IsFontBold() && pt.SI.FontStyle == FontStyleEnum.Italic)
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "Arial BoldItalicMT";
+                        fontname = "Arial Bold Italic.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Condensed Bold Oblique" : "Arial-BoldItalic";
+                        fontname = (_dejavuFonts ? "DejaVuSansCondensed-BoldOblique.ttf" : "arialbi.ttf");
+                    }
+                }
+                else if (pt.SI.IsFontBold())
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "Arial-BoldMT";
+                        fontname = "Arial Bold.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Condensed Bold" : "Arial-Bold";
+                        fontname = (_dejavuFonts ? "DejaVuSansCondensed-Bold.ttf" : "arialbd.ttf");
+                    }
+                }
+                else if (pt.SI.FontStyle == FontStyleEnum.Italic)
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "Arial-ItalicMT";
+                        fontname = "Arial Italic.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Condensed Oblique" : "Arial-Italic";
+                        fontname = (_dejavuFonts ? "DejaVuSansCondensed-Oblique.ttf" : "ariali.ttf");
+                    }
+                }
+                else {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "ArialMT";
+                        fontname = "Arial.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Condensed" : face;
+                        fontname = (_dejavuFonts ? "DejaVuSansCondensed.ttf" : "arial.ttf");
+                    }
+                }
+                fonttype1 = false;
+            }
+            else if (face == "Courier New")
+            {
+                if (pt.SI.IsFontBold() && pt.SI.FontStyle == FontStyleEnum.Italic)
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "CourierNewPS-BoldItalicMT";
+                        fontname = "Courier New Bold Italic.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Mono Bold Oblique" : "Courier New-BoldItalic";
+                        fontname = (_dejavuFonts ? "DejaVuSansMono-BoldOblique.ttf" : "courbi.ttf");
+                    }
+                }
+                else if (pt.SI.IsFontBold())
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "CourierNewPS-BoldMT";
+                        fontname = "Courier New Bold.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Mono Bold" : "Courier New-Bold";
+                        fontname = (_dejavuFonts ? "DejaVuSansMono-Oblique.ttf" : "courbd.ttf");
+                    }
+                }
+                else if (pt.SI.FontStyle == FontStyleEnum.Italic)
+                {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "CourierNewPS-ItalicMT";
+                        fontname = "Courier New Italic.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Mono Oblique" : "Courier New-Italic";
+                        fontname = (_dejavuFonts ? "DejaVuSansMono-Oblique.ttf" : "couri.ttf");
+                    }
+                }
+                else {
+                    //OSX
+                    if (IsOSX)
+                    {
+                        face = "CourierNewPSMT";
+                        fontname = "Courier New.ttf";
+                    }
+                    else {
+                        face = _dejavuFonts ? "DejaVu Sans Mono" : face;
+                        fontname = (_dejavuFonts ? "DejaVuSansMono.ttf" : "cour.ttf");
+                    }
+                }
+                fonttype1 = false;
+            }
+            else {
+                if (pt.SI.IsFontBold() &&
+            pt.SI.FontStyle == FontStyleEnum.Italic)   // bold and italic?
+                    face = face + "-BoldOblique";
+                else if (pt.SI.IsFontBold())           // just bold?
+                    face = face + "-Bold";
+                else if (pt.SI.FontStyle == FontStyleEnum.Italic)
+                    face = face + "-Oblique";
+                fonttype1 = true;
+            }
+            //Get index of fontname in List font name
+            int indexbf = _baseFontsName.FindIndex(delegate (string _fontname) { return _fontname == face; });
+            //If not found then add new BaseFont
+            if (indexbf == -1)
+            {
+                _baseFontsName.Add(face);
+                if (fonttype1)
+                {
+                    bf = BaseFont.CreateFont(face, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
+                }
+                else
+                {
+                    string path = System.IO.Path.Combine(folder, fontname);
+                    bf = BaseFont.CreateFont(path, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                }
+                _baseFonts.Add(bf);
+            }
+            else
+            //Get from List
+            {
+                bf = _baseFonts[indexbf];
+            }
+
+            // Loop thru the lines of text
+            for (int i = 0; i < sa.Length; i++)
+            {
+                string text = sa[i];
+                float textwidth = tw[i];
+                // Calculate the x positino
+                float startX = pt.X + pt.SI.PaddingLeft;						// TODO: handle tb_rl
+                float startY = pt.Y + pt.SI.PaddingTop + (i * pt.SI.FontSize);	// TODO: handle tb_rl
+                int align = 0;
+                if (pt.SI.WritingMode == WritingModeEnum.lr_tb)
+                {	// TODO: not sure what alignment means with tb_lr so I'll leave it out for now
+                    switch (pt.SI.TextAlign)
+                    {
+                        case TextAlignEnum.Center:
+                            if (width > 0)
+                            {
+                                startX = pt.X + pt.SI.PaddingLeft + (width - pt.SI.PaddingLeft - pt.SI.PaddingRight) / 2 - textwidth / 2;
+                                align = Element.ALIGN_CENTER;
+                            }
+                            break;
+                        case TextAlignEnum.Right:
+                            if (width > 0)
+                            {
+                                startX = pt.X + width - textwidth - pt.SI.PaddingRight;
+                                align = Element.ALIGN_RIGHT;
+                            }
+                            break;
+                        case TextAlignEnum.Left:
+                        default:
+                            align = Element.ALIGN_LEFT;
+                            break;
+                    }
+
+                    // Calculate the y position
+                    switch (pt.SI.VerticalAlign)
+                    {
+                        case VerticalAlignEnum.Middle:
+                            if (height <= 0)
+                                break;
+
+                            // calculate the middle of the region
+                            startY = pt.Y + pt.SI.PaddingTop + (height - pt.SI.PaddingTop - pt.SI.PaddingBottom) / 2 - pt.SI.FontSize / 2;
+                            // now go up or down depending on which line
+                            if (sa.Length == 1)
+                                break;
+                            if (sa.Length % 2 == 0)	// even number
+                            {
+                                startY = startY - ((sa.Length / 2 - i) * pt.SI.FontSize) + pt.SI.FontSize / 2;
+                            }
+                            else
+                            {
+                                startY = startY - ((sa.Length / 2 - i) * pt.SI.FontSize);
+                            }
+                            break;
+                        case VerticalAlignEnum.Bottom:
+                            if (height <= 0)
+                                break;
+
+                            startY = pt.Y + height - pt.SI.PaddingBottom - (pt.SI.FontSize * (sa.Length - i));
+                            break;
+                        case VerticalAlignEnum.Top:
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    //25072008 GJL - Move x in a little - it draws to close to the edge of the rectangle (25% of the font size seems to work!) and Center or right align vertical text
+                    startX += pt.SI.FontSize / 4;
+
+                    switch (pt.SI.TextAlign)
+                    {
+                        case TextAlignEnum.Center:
+                            if (height > 0)
+                                startY = pt.Y + pt.SI.PaddingLeft + (height - pt.SI.PaddingLeft - pt.SI.PaddingRight) / 2 - textwidth / 2;
+                            break;
+                        case TextAlignEnum.Right:
+                            if (width > 0)
+                                startY = pt.Y + height - textwidth - pt.SI.PaddingRight;
+                            break;
+                        case TextAlignEnum.Left:
+                        default:
+                            break;
+                    }
+
+                }
+
+                // Draw background rectangle if needed (only put out on the first line, since we do whole rectangle)
+                if (!pt.SI.BackgroundColor.IsEmpty && height > 0 && width > 0 && i == 0)
+                {	// background color, height and width are specified
+                    iAddFillRect(pt.X, pt.Y, width, height, pt.SI.BackgroundColor);
+                }
+
+                // Set the clipping path, (Itext have no clip)
+                if (height > 0 && width > 0)
+                {
+                    _contentByte.SetRGBColorFill(pt.SI.Color.R, pt.SI.Color.G, pt.SI.Color.B);
+
+                    if (pt.SI.WritingMode == WritingModeEnum.lr_tb)
+                    {
+                        //If textline after measure with word break can fit just simple show Text
+                        if (width >= textwidth)
+                        {
+                            _contentByte.BeginText();
+                            _contentByte.SetFontAndSize(bf, pt.SI.FontSize);
+                            _contentByte.SetTextMatrix(startX, (PageSize.yHeight - startY - pt.SI.FontSize));
+                            _contentByte.ShowText(text);
+                            _contentByte.EndText();
+                        }
+                        else
+                        {
+                            //else use Column text to wrap or clip (wrap: for example a text like an URL so word break is not working here, itextsharp ColumnText do the work for us)
+                            ColumnText ct = new ColumnText(_contentByte);
+                            Phrase myPhrase = new Phrase(text, new iTextSharp.text.Font(bf, pt.SI.FontSize));
+                            ct.SetSimpleColumn(myPhrase, pt.X + pt.SI.PaddingLeft, PageSize.yHeight - startY, pt.X + width - pt.SI.PaddingRight, PageSize.yHeight - pt.Y - pt.SI.PaddingBottom - height, 10f, align);
+                            ct.Go();
+                        }
+                    }
+                    else
+                    {
+                        //Not checked
+                        double rads = -283.0 / 180.0;
+                        double radsCos = Math.Cos(rads);
+                        double radsSin = Math.Sin(rads);
+                        _contentByte.BeginText();
+                        _contentByte.SetFontAndSize(bf, pt.SI.FontSize);
+                        _contentByte.SetTextMatrix((float)radsCos, (float)radsSin, (float)-radsSin, (float)radsCos, startX, PageSize.yHeight - startY);
+                        _contentByte.ShowText(text);
+                        _contentByte.EndText();
+                    }
+
+                    //add URL
+                    if (pt.HyperLink != null)
+                        _pdfDocument.Add(new Annotation(pt.X, PageSize.yHeight - (pt.Y + height), width + pt.X, PageSize.yHeight - pt.Y, pt.HyperLink));
+                    //add tooltip
+                    if (pt.Tooltip != null)
+                        _pdfDocument.Add(new Annotation(pt.X, PageSize.yHeight - (pt.Y + height), width +pt.X, PageSize.yHeight - pt.Y,pt.Tooltip));
+
+                }
+
+                // Handle underlining etc.
+                float maxX;
+                switch (pt.SI.TextDecoration)
+                {
+                    case TextDecorationEnum.Underline:
+                        maxX = width > 0 ? Math.Min(pt.X + width, startX + textwidth) : startX + textwidth;
+                        AddLine(startX, startY + pt.SI.FontSize + 1, maxX, startY + pt.SI.FontSize + 1, 1, pt.SI.Color, BorderStyleEnum.Solid);
+                        break;
+                    case TextDecorationEnum.LineThrough:
+                        maxX = width > 0 ? Math.Min(pt.X + width, startX + textwidth) : startX + textwidth;
+                        AddLine(startX, startY + (pt.SI.FontSize / 2) + 1, maxX, startY + (pt.SI.FontSize / 2) + 1, 1, pt.SI.Color, BorderStyleEnum.Solid);
+                        break;
+                    case TextDecorationEnum.Overline:
+                        maxX = width > 0 ? Math.Min(pt.X + width, startX + textwidth) : startX + textwidth;
+                        AddLine(startX, startY + 1, maxX, startY + 1, 1, pt.SI.Color, BorderStyleEnum.Solid);
+                        break;
+                    case TextDecorationEnum.None:
+                    default:
+                        break;
+                }
+            }
+
+            iAddBorder(pt.SI, pt.X, pt.Y, height, width);			// add any required border
+
+            return;
+        }
         #endregion
 
         #region private methods
@@ -354,378 +732,6 @@ namespace fyiReporting.RDL
                     break;
             }
             return faceName;
-        }
-        protected internal override void AddText(float x, float y, float height, float width, string[] sa, StyleInfo si, float[] tw, bool bWrap, string url, bool bNoClip, string tooltip)
-        {
-
-            BaseFont bf;
-            string face = iFontNameNormalize(si.FontFamily);
-            string fontname = "";
-            bool fonttype1 = true;
-            var folder = FontFolder; //Call to determine folder and set value of _dejavuFonts;
-            if (face == "Times-Roman")
-            {
-                if (si.IsFontBold() && si.FontStyle == FontStyleEnum.Italic)
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "TimesNewRomanPS-BoldItalicMT";
-                        fontname = "Times New Roman Bold Italic.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Serif Condensed Bold Italic" : "Times-BoldItalic";
-                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed-BoldItalic.ttf" : "timesbi.ttf");
-                    }
-                }
-                else if (si.IsFontBold())
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "TimesNewRomanPS-BoldMT";
-                        fontname = "Times New Roman Bold.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Serif Condensed Bold" : "Times-Bold";
-                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed-Bold.ttf" : "timesbd.ttf");
-                    }
-                }
-                else if (si.FontStyle == FontStyleEnum.Italic)
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "TimesNewRomanPS-ItalicMT";
-                        fontname = "Times New Roman Italic.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Serif Condensed Italic" : "Times-Italic";
-                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed-Italic.ttf" : "timesi.ttf");
-                    }
-                }
-                else {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "TimesNewRomanPSMT";
-                        fontname = "Times New Roman.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Serif Condensed" : face;
-                        fontname = (_dejavuFonts ? "DejaVuSerifCondensed.ttf" : "times.ttf");
-                    }
-                }
-                fonttype1 = false;
-            }
-            else if (face == "Arial")
-            {
-                if (si.IsFontBold() && si.FontStyle == FontStyleEnum.Italic)
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "Arial BoldItalicMT";
-                        fontname = "Arial Bold Italic.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Condensed Bold Oblique" : "Arial-BoldItalic";
-                        fontname = (_dejavuFonts ? "DejaVuSansCondensed-BoldOblique.ttf" : "arialbi.ttf");
-                    }
-                }
-                else if (si.IsFontBold())
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "Arial-BoldMT";
-                        fontname = "Arial Bold.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Condensed Bold" : "Arial-Bold";
-                        fontname = (_dejavuFonts ? "DejaVuSansCondensed-Bold.ttf" : "arialbd.ttf");
-                    }
-                }
-                else if (si.FontStyle == FontStyleEnum.Italic)
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "Arial-ItalicMT";
-                        fontname = "Arial Italic.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Condensed Oblique" : "Arial-Italic";
-                        fontname = (_dejavuFonts ? "DejaVuSansCondensed-Oblique.ttf" : "ariali.ttf");
-                    }
-                }
-                else {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "ArialMT";
-                        fontname = "Arial.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Condensed" : face;
-                        fontname = (_dejavuFonts ? "DejaVuSansCondensed.ttf" : "arial.ttf");
-                    }
-                }
-                fonttype1 = false;
-            }
-            else if (face == "Courier New")
-            {
-                if (si.IsFontBold() && si.FontStyle == FontStyleEnum.Italic)
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "CourierNewPS-BoldItalicMT";
-                        fontname = "Courier New Bold Italic.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Mono Bold Oblique" : "Courier New-BoldItalic";
-                        fontname = (_dejavuFonts ? "DejaVuSansMono-BoldOblique.ttf" : "courbi.ttf");
-                    }
-                }
-                else if (si.IsFontBold())
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "CourierNewPS-BoldMT";
-                        fontname = "Courier New Bold.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Mono Bold" : "Courier New-Bold";
-                        fontname = (_dejavuFonts ? "DejaVuSansMono-Oblique.ttf" : "courbd.ttf");
-                    }
-                }
-                else if (si.FontStyle == FontStyleEnum.Italic)
-                {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "CourierNewPS-ItalicMT";
-                        fontname = "Courier New Italic.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Mono Oblique" : "Courier New-Italic";
-                        fontname = (_dejavuFonts ? "DejaVuSansMono-Oblique.ttf" : "couri.ttf");
-                    }
-                }
-                else {
-                    //OSX
-                    if (IsOSX)
-                    {
-                        face = "CourierNewPSMT";
-                        fontname = "Courier New.ttf";
-                    }
-                    else {
-                        face = _dejavuFonts ? "DejaVu Sans Mono" : face;
-                        fontname = (_dejavuFonts ? "DejaVuSansMono.ttf" : "cour.ttf");
-                    }
-                }
-                fonttype1 = false;
-            }
-            else {
-                if (si.IsFontBold() &&
-            si.FontStyle == FontStyleEnum.Italic)   // bold and italic?
-                    face = face + "-BoldOblique";
-                else if (si.IsFontBold())           // just bold?
-                    face = face + "-Bold";
-                else if (si.FontStyle == FontStyleEnum.Italic)
-                    face = face + "-Oblique";
-                fonttype1 = true;
-            }
-            //Get index of fontname in List font name
-            int indexbf = _baseFontsName.FindIndex(delegate (string _fontname) { return _fontname == face; });
-            //If not found then add new BaseFont
-            if (indexbf == -1)
-            {
-                _baseFontsName.Add(face);
-                if (fonttype1)
-                {
-                    bf = BaseFont.CreateFont(face, BaseFont.WINANSI, BaseFont.NOT_EMBEDDED);
-                }
-                else
-                {
-                    string path = System.IO.Path.Combine(folder, fontname);
-                    bf = BaseFont.CreateFont(path, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-                }
-                _baseFonts.Add(bf);
-            }
-            else
-            //Get from List
-            {
-                bf = _baseFonts[indexbf];
-            }
-
-            // Loop thru the lines of text
-            for (int i = 0; i < sa.Length; i++)
-            {
-                string text = sa[i];
-                float textwidth = tw[i];
-                // Calculate the x positino
-                float startX = x + si.PaddingLeft;						// TODO: handle tb_rl
-                float startY = y + si.PaddingTop + (i * si.FontSize);	// TODO: handle tb_rl
-                int align = 0;
-                if (si.WritingMode == WritingModeEnum.lr_tb)
-                {	// TODO: not sure what alignment means with tb_lr so I'll leave it out for now
-                    switch (si.TextAlign)
-                    {
-                        case TextAlignEnum.Center:
-                            if (width > 0)
-                            {
-                                startX = x + si.PaddingLeft + (width - si.PaddingLeft - si.PaddingRight) / 2 - textwidth / 2;
-                                align = Element.ALIGN_CENTER;
-                            }
-                            break;
-                        case TextAlignEnum.Right:
-                            if (width > 0)
-                            {
-                                startX = x + width - textwidth - si.PaddingRight;
-                                align = Element.ALIGN_RIGHT;
-                            }
-                            break;
-                        case TextAlignEnum.Left:
-                        default:
-                            align = Element.ALIGN_LEFT;
-                            break;
-                    }
-
-                    // Calculate the y position
-                    switch (si.VerticalAlign)
-                    {
-                        case VerticalAlignEnum.Middle:
-                            if (height <= 0)
-                                break;
-
-                            // calculate the middle of the region
-                            startY = y + si.PaddingTop + (height - si.PaddingTop - si.PaddingBottom) / 2 - si.FontSize / 2;
-                            // now go up or down depending on which line
-                            if (sa.Length == 1)
-                                break;
-                            if (sa.Length % 2 == 0)	// even number
-                            {
-                                startY = startY - ((sa.Length / 2 - i) * si.FontSize) + si.FontSize / 2;
-                            }
-                            else
-                            {
-                                startY = startY - ((sa.Length / 2 - i) * si.FontSize);
-                            }
-                            break;
-                        case VerticalAlignEnum.Bottom:
-                            if (height <= 0)
-                                break;
-
-                            startY = y + height - si.PaddingBottom - (si.FontSize * (sa.Length - i));
-                            break;
-                        case VerticalAlignEnum.Top:
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                    //25072008 GJL - Move x in a little - it draws to close to the edge of the rectangle (25% of the font size seems to work!) and Center or right align vertical text
-                    startX += si.FontSize / 4;
-
-                    switch (si.TextAlign)
-                    {
-                        case TextAlignEnum.Center:
-                            if (height > 0)
-                                startY = y + si.PaddingLeft + (height - si.PaddingLeft - si.PaddingRight) / 2 - textwidth / 2;
-                            break;
-                        case TextAlignEnum.Right:
-                            if (width > 0)
-                                startY = y + height - textwidth - si.PaddingRight;
-                            break;
-                        case TextAlignEnum.Left:
-                        default:
-                            break;
-                    }
-
-                }
-
-                // Draw background rectangle if needed (only put out on the first line, since we do whole rectangle)
-                if (!si.BackgroundColor.IsEmpty && height > 0 && width > 0 && i == 0)
-                {	// background color, height and width are specified
-                    iAddFillRect(x, y, width, height, si.BackgroundColor);
-                }
-
-                // Set the clipping path, (Itext have no clip)
-                if (height > 0 && width > 0)
-                {
-                    _contentByte.SetRGBColorFill(si.Color.R, si.Color.G, si.Color.B);
-
-                    if (si.WritingMode == WritingModeEnum.lr_tb)
-                    {
-                        //If textline after measure with word break can fit just simple show Text
-                        if (width >= textwidth)
-                        {
-                            _contentByte.BeginText();
-                            _contentByte.SetFontAndSize(bf, si.FontSize);
-                            _contentByte.SetTextMatrix(startX, (PageSize.yHeight - startY - si.FontSize));
-                            _contentByte.ShowText(text);
-                            _contentByte.EndText();
-                        }
-                        else
-                        {
-                            //else use Column text to wrap or clip (wrap: for example a text like an URL so word break is not working here, itextsharp ColumnText do the work for us)
-                            ColumnText ct = new ColumnText(_contentByte);
-                            Phrase myPhrase = new Phrase(text, new iTextSharp.text.Font(bf, si.FontSize));
-                            ct.SetSimpleColumn(myPhrase, x + si.PaddingLeft, PageSize.yHeight - startY, x + width - si.PaddingRight, PageSize.yHeight - y - si.PaddingBottom - height, 10f, align);
-                            ct.Go();
-                        }
-                    }
-                    else
-                    {
-                        //Not checked
-                        double rads = -283.0 / 180.0;
-                        double radsCos = Math.Cos(rads);
-                        double radsSin = Math.Sin(rads);
-                        _contentByte.BeginText();
-                        _contentByte.SetFontAndSize(bf, si.FontSize);
-                        _contentByte.SetTextMatrix((float)radsCos, (float)radsSin, (float)-radsSin, (float)radsCos, startX, PageSize.yHeight - startY);
-                        _contentByte.ShowText(text);
-                        _contentByte.EndText();
-                    }
-
-                    //add URL
-                    if (url != null)
-                        _pdfDocument.Add(new Annotation(x, PageSize.yHeight - (y + height), width + x, PageSize.yHeight - y, url));
-                    //add tooltip
-                    if (tooltip != null)
-                        _pdfDocument.Add(new Annotation(x, PageSize.yHeight - (y + height), width + x, PageSize.yHeight - y, tooltip));
-
-                }
-
-                // Handle underlining etc.
-                float maxX;
-                switch (si.TextDecoration)
-                {
-                    case TextDecorationEnum.Underline:
-                        maxX = width > 0 ? Math.Min(x + width, startX + textwidth) : startX + textwidth;
-                        AddLine(startX, startY + si.FontSize + 1, maxX, startY + si.FontSize + 1, 1, si.Color, BorderStyleEnum.Solid);
-                        break;
-                    case TextDecorationEnum.LineThrough:
-                        maxX = width > 0 ? Math.Min(x + width, startX + textwidth) : startX + textwidth;
-                        AddLine(startX, startY + (si.FontSize / 2) + 1, maxX, startY + (si.FontSize / 2) + 1, 1, si.Color, BorderStyleEnum.Solid);
-                        break;
-                    case TextDecorationEnum.Overline:
-                        maxX = width > 0 ? Math.Min(x + width, startX + textwidth) : startX + textwidth;
-                        AddLine(startX, startY + 1, maxX, startY + 1, 1, si.Color, BorderStyleEnum.Solid);
-                        break;
-                    case TextDecorationEnum.None:
-                    default:
-                        break;
-                }
-            }
-
-            iAddBorder(si, x, y, height, width);			// add any required border
-
-            return;
         }
         /// <summary>
         /// Add a filled rectangle
