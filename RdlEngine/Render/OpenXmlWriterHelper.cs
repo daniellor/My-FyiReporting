@@ -27,11 +27,10 @@ namespace fyiReporting.RDL
         /// correctly.
         /// </summary>
         /// <returns></returns>
-        private Stylesheet CreateDefaultStylesheet()
+        public Stylesheet CreateDefaultStylesheet()
         {
 
             Stylesheet ss = new Stylesheet();
-
             Fonts fts = new Fonts();
             DocumentFormat.OpenXml.Spreadsheet.Font ft = new DocumentFormat.OpenXml.Spreadsheet.Font();
             FontName ftn = new FontName();

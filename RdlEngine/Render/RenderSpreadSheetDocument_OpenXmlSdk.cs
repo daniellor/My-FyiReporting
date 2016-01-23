@@ -42,6 +42,8 @@ using System.Security;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using System.Linq;
+
 
 namespace fyiReporting.RDL
 {
@@ -61,6 +63,7 @@ namespace fyiReporting.RDL
         OpenXmlWriterHelper _openXmlExportHelper ;
         Workbook _workbook; 
         WorkbookPart _workbookPart ;
+        Stylesheet _styleSheet;
 
         #endregion
 
@@ -87,8 +90,7 @@ namespace fyiReporting.RDL
             _workbookPart = _spreadSheet.AddWorkbookPart();
 
             var openXmlExportHelper = new OpenXmlWriterHelper();
-            openXmlExportHelper.SaveCustomStylesheet(_workbookPart);
-
+            _styleSheet = openXmlExportHelper.CreateDefaultStylesheet();
 
             _workbookPart.Workbook = _workbook;
             var sheets = _workbook.AppendChild<Sheets>(new Sheets());
@@ -103,11 +105,15 @@ namespace fyiReporting.RDL
             _writer.WriteStartElement(new Worksheet());
             _writer.WriteStartElement(new SheetData());
 
-
+            
         }
 
         protected internal override void EndDocument(Stream sg)
         {
+            var workbookStylesPart = _workbookPart.AddNewPart<WorkbookStylesPart>();
+            var style = workbookStylesPart.Stylesheet = _styleSheet;
+            style.Save();
+
             _writer.Close();
             //create the share string part using sax like approach too
             _openXmlExportHelper.CreateShareStringPart(_workbookPart);
@@ -163,7 +169,7 @@ namespace fyiReporting.RDL
         }
         protected internal override void AddText(PageText pt, Pages pgs)
         {
-            
+           int? idCellFormat=GetStyleIndex(pt.SI);
             if (_currentRow == null)
             {
                 _currentRow =pt.Y;
@@ -175,8 +181,14 @@ namespace fyiReporting.RDL
                 _writer.WriteEndElement();
                 _writer.WriteStartElement(new DocumentFormat.OpenXml.Spreadsheet.Row());
             }
-            
-            _openXmlExportHelper.WriteCellValueSax(_writer,pt.Text , CellValues.InlineString);
+
+            if (idCellFormat != null)
+            {
+                var attributes = new OpenXmlAttribute[] { new OpenXmlAttribute("s", null, idCellFormat.ToString()) }.ToList();
+                _openXmlExportHelper.WriteCellValueSax(_writer, pt.Text, CellValues.InlineString,attributes);
+            }
+            else
+                _openXmlExportHelper.WriteCellValueSax(_writer, pt.Text, CellValues.InlineString);
 
            
         }
@@ -184,6 +196,155 @@ namespace fyiReporting.RDL
         #endregion
 
         #region private methods
+        private int? GetStyleIndex(StyleInfo si)
+        {
+            // DocumentFormat.OpenXml.Spreadsheet.Fonts fonts1 = new DocumentFormat.OpenXml.Spreadsheet.Fonts()
+            //                                                     { Count = (UInt32Value)1U, KnownFonts = true };
+            int? fontId = null;
+            int? borderId=null;
+            int? cellFormatId = null;
+
+            DocumentFormat.OpenXml.Spreadsheet.Font font = new DocumentFormat.OpenXml.Spreadsheet.Font();
+            
+            if (si.IsFontBold())
+                font.Append(new DocumentFormat.OpenXml.Spreadsheet.Bold());
+            if (si.FontStyle == FontStyleEnum.Italic)
+                font.Append(new DocumentFormat.OpenXml.Spreadsheet.Italic());
+
+            font.Append(new DocumentFormat.OpenXml.Spreadsheet.FontSize() { Val = (Double)si.FontSize });
+            font.Append(new DocumentFormat.OpenXml.Spreadsheet.FontName() { Val=si.FontFamily });
+            //font.Append(new DocumentFormat.OpenXml.Spreadsheet.Color()
+            //            {  Rgb=GetColor(si.Color) });
+
+          
+            int id = 0;
+            foreach(var fo in _styleSheet.Fonts)
+            {
+                if (fo.OuterXml.Equals(font.OuterXml))
+                {
+                    fontId = id;
+                    break;
+                }
+                id++;
+            }
+
+            if (fontId==null)
+            {
+                _styleSheet.Fonts.Append(font);
+                _styleSheet.Fonts.Count = (uint)_styleSheet.Fonts.ChildElements.Count;
+                fontId = _styleSheet.Fonts.ChildElements.Count-1;
+            }
+           
+            Border border = new Border();
+            if (si.BStyleLeft != BorderStyleEnum.None)
+            {
+                border.LeftBorder = new LeftBorder() { Style = GetBorderStyle(si.BStyleLeft) };
+            }
+            if (si.BStyleRight != BorderStyleEnum.None)
+            {
+                border.RightBorder = new RightBorder() { Style = GetBorderStyle(si.BStyleRight) };
+            }
+            if (si.BStyleTop != BorderStyleEnum.None)
+            {
+                border.TopBorder = new TopBorder() { Style = GetBorderStyle(si.BStyleTop) };
+            }
+            if (si.BStyleBottom != BorderStyleEnum.None)
+            {
+                border.BottomBorder = new BottomBorder() { Style = GetBorderStyle(si.BStyleBottom) };
+            }
+
+            id = 0;
+            foreach (var bo in _styleSheet.Borders)
+            {
+                if (bo.OuterXml.Equals(border.OuterXml))
+                {
+                    borderId = id;
+                    break;
+                }
+                id++;
+            }
+
+            if (borderId == null)
+            {
+                _styleSheet.Borders.Append(border);
+                _styleSheet.Borders.Count = (uint)_styleSheet.Borders.ChildElements.Count;
+                borderId = _styleSheet.Borders.ChildElements.Count-1;
+            }
+
+            CellFormat cf = new CellFormat();
+            cf.NumberFormatId = 0;
+            cf.FontId = (uint)fontId;
+            cf.FillId = 0;
+            cf.BorderId = (uint)borderId;
+            cf.FormatId = 0;
+
+
+            id = 0;
+            foreach (var cef in _styleSheet.CellFormats)
+            {
+                if (cef.OuterXml.Equals(cf.OuterXml))
+                {
+                    cellFormatId = id;
+                    break;
+                }
+                id++;
+            }
+
+            if (cellFormatId == null)
+            {
+                _styleSheet.CellFormats.Append(cf);
+                _styleSheet.CellFormats.Count = (uint)_styleSheet.CellFormats.ChildElements.Count;
+                cellFormatId = _styleSheet.CellFormats.ChildElements.Count-1;
+            }
+
+
+            return cellFormatId;
+           
+
+
+        }
+
+        string GetColor(System.Drawing.Color c)
+        {
+            return GetColor("color", c);
+        }
+
+        string GetColor(string name, System.Drawing.Color c)
+        {
+            string s = string.Format("FF{0}{1}{2}", GetColor(c.R), GetColor(c.G), GetColor(c.B));
+            return s;
+        }
+
+        string GetColor(byte b)
+        {
+            string sb = Convert.ToString(b, 16).ToUpperInvariant();
+            return sb.Length > 1 ? sb : "0" + sb;
+        }
+
+        BorderStyleValues GetBorderStyle(BorderStyleEnum bs)
+        {
+            BorderStyleValues s;
+            switch (bs)
+            {
+                case BorderStyleEnum.Dashed:
+                    s = BorderStyleValues.Dashed;
+                    break;
+                case BorderStyleEnum.Dotted:
+                    s = BorderStyleValues.Dotted;
+                    break;
+                case BorderStyleEnum.Double:
+                    s = BorderStyleValues.Double;
+                    break;
+                case BorderStyleEnum.None:
+                    s = BorderStyleValues.None;
+                    break;
+                default:
+                    s = BorderStyleValues.None;
+                    break;
+            }
+            return s;
+        }
+
         #endregion
 
 
