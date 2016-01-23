@@ -13,7 +13,7 @@ using ReportTests.Utils;
 namespace ReportTests.Utils
 {
     [TestFixture]
-    public class RenderSpreadSheetDocument_OpenXmlSdkTests
+    public class RenderSpreadSheet_OXSdkTests
     {
         private Uri _reportFolder = null;
         private Uri _outputFolder = null;

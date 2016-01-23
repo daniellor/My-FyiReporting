@@ -134,7 +134,7 @@
     <Compile Include="ExcelValetTests.cs" />
     <Compile Include="FunctionTest.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="RenderSpreadSheetDocument_OpenXmlSdkTests.cs" />
+    <Compile Include="RenderSpreadSheet_OXSdkTests.cs" />
     <Compile Include="Utils\GeneralUtils.cs" />
     <Compile Include="Utils\OpenXmlUtils.cs" />
     <Compile Include="Utils\RandomDateTime.cs" />
