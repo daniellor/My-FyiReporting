@@ -43,7 +43,8 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Linq;
-
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace fyiReporting.RDL
 {
@@ -169,7 +170,8 @@ namespace fyiReporting.RDL
         }
         protected internal override void AddText(PageText pt, Pages pgs)
         {
-           int? idCellFormat=GetStyleIndex(pt.SI);
+            string value = pt.Text;
+            int? idCellFormat=GetStyleIndex(pt, ref value);
             if (_currentRow == null)
             {
                 _currentRow =pt.Y;
@@ -184,8 +186,12 @@ namespace fyiReporting.RDL
 
             if (idCellFormat != null)
             {
+               
                 var attributes = new OpenXmlAttribute[] { new OpenXmlAttribute("s", null, idCellFormat.ToString()) }.ToList();
-                _openXmlExportHelper.WriteCellValueSax(_writer, pt.Text, CellValues.InlineString,attributes);
+                if ((IsNumeric(value) || IsNumeric(value, CultureInfo.CurrentCulture)))
+                    _openXmlExportHelper.WriteCellValueSax(_writer, value, CellValues.Number, attributes);
+                else
+                    _openXmlExportHelper.WriteCellValueSax(_writer, value, CellValues.InlineString,attributes);
             }
             else
                 _openXmlExportHelper.WriteCellValueSax(_writer, pt.Text, CellValues.InlineString);
@@ -196,7 +202,7 @@ namespace fyiReporting.RDL
         #endregion
 
         #region private methods
-        private int? GetStyleIndex(StyleInfo si)
+        private int? GetStyleIndex(PageText pt,ref string value)
         {
             // DocumentFormat.OpenXml.Spreadsheet.Fonts fonts1 = new DocumentFormat.OpenXml.Spreadsheet.Fonts()
             //                                                     { Count = (UInt32Value)1U, KnownFonts = true };
@@ -206,13 +212,13 @@ namespace fyiReporting.RDL
 
             DocumentFormat.OpenXml.Spreadsheet.Font font = new DocumentFormat.OpenXml.Spreadsheet.Font();
             
-            if (si.IsFontBold())
+            if ( pt.SI.IsFontBold())
                 font.Append(new DocumentFormat.OpenXml.Spreadsheet.Bold());
-            if (si.FontStyle == FontStyleEnum.Italic)
+            if (pt.SI.FontStyle == FontStyleEnum.Italic)
                 font.Append(new DocumentFormat.OpenXml.Spreadsheet.Italic());
 
-            font.Append(new DocumentFormat.OpenXml.Spreadsheet.FontSize() { Val = (Double)si.FontSize });
-            font.Append(new DocumentFormat.OpenXml.Spreadsheet.FontName() { Val=si.FontFamily });
+            font.Append(new DocumentFormat.OpenXml.Spreadsheet.FontSize() { Val = (Double)pt.SI.FontSize });
+            font.Append(new DocumentFormat.OpenXml.Spreadsheet.FontName() { Val=pt.SI.FontFamily });
             //font.Append(new DocumentFormat.OpenXml.Spreadsheet.Color()
             //            {  Rgb=GetColor(si.Color) });
 
@@ -236,21 +242,21 @@ namespace fyiReporting.RDL
             }
            
             Border border = new Border();
-            if (si.BStyleLeft != BorderStyleEnum.None)
+            if (pt.SI.BStyleLeft != BorderStyleEnum.None)
             {
-                border.LeftBorder = new LeftBorder() { Style = GetBorderStyle(si.BStyleLeft) };
+                border.LeftBorder = new LeftBorder() { Style = GetBorderStyle(pt.SI.BStyleLeft) };
             }
-            if (si.BStyleRight != BorderStyleEnum.None)
+            if (pt.SI.BStyleRight != BorderStyleEnum.None)
             {
-                border.RightBorder = new RightBorder() { Style = GetBorderStyle(si.BStyleRight) };
+                border.RightBorder = new RightBorder() { Style = GetBorderStyle(pt.SI.BStyleRight) };
             }
-            if (si.BStyleTop != BorderStyleEnum.None)
+            if (pt.SI.BStyleTop != BorderStyleEnum.None)
             {
-                border.TopBorder = new TopBorder() { Style = GetBorderStyle(si.BStyleTop) };
+                border.TopBorder = new TopBorder() { Style = GetBorderStyle(pt.SI.BStyleTop) };
             }
-            if (si.BStyleBottom != BorderStyleEnum.None)
+            if (pt.SI.BStyleBottom != BorderStyleEnum.None)
             {
-                border.BottomBorder = new BottomBorder() { Style = GetBorderStyle(si.BStyleBottom) };
+                border.BottomBorder = new BottomBorder() { Style = GetBorderStyle(pt.SI.BStyleBottom) };
             }
 
             id = 0;
@@ -271,12 +277,28 @@ namespace fyiReporting.RDL
                 borderId = _styleSheet.Borders.ChildElements.Count-1;
             }
 
+
+            value = value.Replace("(", "-");
+            value = value.Replace(")", "");
+            value = value.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator, "");
+            value = value.Replace(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, ".");
+            value = value.Replace("$", "");
+
+            if (value.IndexOf('%') != -1)       //WRP 31102008 if a properly RDL formatted percentage need to remove "%" and pass throught value/100 to excel for correct formatting
+            {
+                value = value.Replace("%", String.Empty);
+                decimal decvalue = Convert.ToDecimal(value) / 100;
+                value = decvalue.ToString();
+            }
+            value = Regex.Replace(value, @"\s+", "");      //WRP 31102008 remove any white space
+
+
             CellFormat cf = new CellFormat();
-            cf.NumberFormatId = 0;
+            cf.NumberFormatId = (uint)StyleInfo.GetFormatCode(pt.SI._Format);
             cf.FontId = (uint)fontId;
             cf.FillId = 0;
             cf.BorderId = (uint)borderId;
-            cf.FormatId = 0;
+           // cf.FormatId = 0;
 
 
             id = 0;
@@ -303,7 +325,12 @@ namespace fyiReporting.RDL
 
 
         }
-
+        private bool IsNumeric(string str, CultureInfo culture = null, NumberStyles style = NumberStyles.Number)
+        {
+            double numOut;
+            if (culture == null) culture = CultureInfo.InvariantCulture;
+            return Double.TryParse(str, style, culture, out numOut) && !String.IsNullOrWhiteSpace(str);
+        }
         string GetColor(System.Drawing.Color c)
         {
             return GetColor("color", c);
@@ -326,6 +353,9 @@ namespace fyiReporting.RDL
             BorderStyleValues s;
             switch (bs)
             {
+                case BorderStyleEnum.Solid:
+                    s = BorderStyleValues.Thin;
+                    break;
                 case BorderStyleEnum.Dashed:
                     s = BorderStyleValues.Dashed;
                     break;
@@ -339,7 +369,7 @@ namespace fyiReporting.RDL
                     s = BorderStyleValues.None;
                     break;
                 default:
-                    s = BorderStyleValues.None;
+                    s = BorderStyleValues.Thin;
                     break;
             }
             return s;

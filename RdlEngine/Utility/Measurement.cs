@@ -420,7 +420,13 @@ namespace fyiReporting.RDL.Utility
             return sz;
         }
 
-      
+        // convert points to Excel units: characters 
+        //   Assume 11 characters to the inch
+        public static float PointsToExcelUnits(float pointWidth)
+        {
+            return (float)(pointWidth / POINTSIZE_F) * 11; 
+        }
+
 
         #region Obsolete Methods
         /// <summary>
