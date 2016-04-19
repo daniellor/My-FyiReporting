@@ -128,7 +128,7 @@ namespace fyiReporting.RDL
         }
         #endregion
 
-        #region implementations
+        #region abstract implementations
         protected internal override void CreateDocument()
         {
             Report r = base.Report();
@@ -160,16 +160,9 @@ namespace fyiReporting.RDL
             _pdfDocument.NewPage();
         }
 
-        protected internal override void AfterProcessPage()
-        {
+        #endregion
 
-        }
-
-        protected internal override void AddBookmark(PageText pt)
-        {
-
-        }
-
+        #region virtual methods
         protected internal override void AddLine(float x, float y, float x2, float y2, float width, System.Drawing.Color c, BorderStyleEnum ls)
         {
             // Get the line color			

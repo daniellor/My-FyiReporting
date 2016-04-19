@@ -36,6 +36,7 @@ using System.Drawing.Imaging;
 using System.Text;
 using fyiReporting.RDL.Utility;
 using System.Security;
+using System.Globalization;
 
 namespace fyiReporting.RDL
 {
@@ -51,7 +52,7 @@ namespace fyiReporting.RDL
         #region private
         Stream _streamGen;                  // where the output is going
         Report _report;                 // report
-    
+
         #endregion
 
 
@@ -67,30 +68,30 @@ namespace fyiReporting.RDL
 
 
         #region abstract methods
-        internal protected void  AddLine(float x, float y, float x2, float y2, StyleInfo si)
-        {
-            AddLine(x, y, x2, y2, si.BWidthTop, si.BColorTop, si.BStyleTop);
-        }
         /// <summary>
         /// Page line element at the X Y to X2 Y2 position
         /// </summary>
         /// <returns></returns>
         internal abstract protected void CreateDocument();
         internal abstract protected void EndDocument(Stream sg);
-        internal abstract protected void CreatePage();
-        internal abstract protected void AfterProcessPage();
-        internal abstract protected void AddBookmark(PageText pt);
 
-        internal abstract protected void AddLine(float x, float y, float x2, float y2, float width, System.Drawing.Color c, BorderStyleEnum ls);
-       
-      
+        #endregion
+
+        #region virtual methods
+        internal virtual protected void CreatePage() { }
+        internal virtual protected void AfterProcessPage() { }
+        internal virtual protected void AddBookmark(PageText pt) { }
+
+        internal virtual protected void AddLine(float x, float y, float x2, float y2, float width, System.Drawing.Color c, BorderStyleEnum ls) { }
+
+
         /// <summary>
         /// Add image to the page.
         /// </summary>
         /// <returns>string Image name</returns>
-        internal abstract protected void AddImage(string name,  StyleInfo si,
+        internal virtual protected void AddImage(string name, StyleInfo si,
             ImageFormat imf, float x, float y, float width, float height, RectangleF clipRect,
-            byte[] im, int samplesW, int samplesH, string url, string tooltip);
+            byte[] im, int samplesW, int samplesH, string url, string tooltip) { }
 
         /// <summary>
         /// Page Polygon
@@ -99,38 +100,38 @@ namespace fyiReporting.RDL
         /// <param name="si"></param>
         /// <param name="url"></param>
         /// <param name="patterns"></param>
-        internal abstract protected void AddPolygon(PointF[] pts, StyleInfo si, string url);
+        internal virtual protected void AddPolygon(PointF[] pts, StyleInfo si, string url) { }
 
-      
+
         /// <summary>
         /// Page Rectangle element at the X Y position
         /// </summary>
         /// <returns></returns>
-        internal abstract protected void AddRectangle(float x, float y, float height, float width, StyleInfo si, string url,  string tooltip);
+        internal virtual protected void AddRectangle(float x, float y, float height, float width, StyleInfo si, string url, string tooltip) { }
         /// <summary>
         /// Draw a pie
         /// </summary>
         /// <returns></returns>
-        internal abstract protected void AddPie(float x, float y, float height, float width, StyleInfo si, string url,  string tooltip);
+        internal virtual protected void AddPie(float x, float y, float height, float width, StyleInfo si, string url, string tooltip) { }
 
         /// <summary>
         /// Draw a curve
         /// </summary>
         /// <returns></returns>
-        internal abstract protected void AddCurve(PointF[] pts, StyleInfo si);
+        internal virtual protected void AddCurve(PointF[] pts, StyleInfo si) { }
 
 
-      
+
         //25072008 GJL Draw 4 bezier curves to approximate a circle
-        internal abstract protected void AddEllipse(float x, float y, float height, float width, StyleInfo si, string url);
+        internal virtual protected void AddEllipse(float x, float y, float height, float width, StyleInfo si, string url) { }
 
-        
+
 
         /// <summary>
         /// Page Text element at the X Y position; multiple lines handled
         /// </summary>
         /// <returns></returns>
-        internal abstract protected void AddText(PageText pt, Pages pgs);
+        internal virtual protected void AddText(PageText pt, Pages pgs) { }
 
         #endregion
 
@@ -149,11 +150,7 @@ namespace fyiReporting.RDL
             return _report;
         }
 
-        public bool IsPagingNeeded()
-        {
-            return true;
-        }
-
+       
         public void Start()
         {
             CreateDocument();
@@ -366,178 +363,211 @@ namespace fyiReporting.RDL
 
         }
 
-       
-       
-     
+
+        #region protected utils
+        internal protected bool IsTableCell(Textbox tb)
+        {
+            Type tp = tb.Parent.Parent.GetType();
+            return (tp == typeof(TableCell) ||
+                tp == typeof(Corner) ||
+                tp == typeof(DynamicColumns) ||
+                tp == typeof(DynamicRows) ||
+                tp == typeof(StaticRow) ||
+                tp == typeof(StaticColumn) ||
+                tp == typeof(Subtotal) ||
+                tp == typeof(MatrixCell));
+
+        }
+        internal protected bool IsNumeric(string str, CultureInfo culture = null, NumberStyles style = NumberStyles.Number)
+        {
+            double numOut;
+            if (culture == null) culture = CultureInfo.InvariantCulture;
+            return Double.TryParse(str, style, culture, out numOut) && !String.IsNullOrWhiteSpace(str);
+        }
+        internal protected void AddLine(float x, float y, float x2, float y2, StyleInfo si)
+        {
+            AddLine(x, y, x2, y2, si.BWidthTop, si.BColorTop, si.BStyleTop);
+        }
+
+        #endregion
+
+        #region IPresent implementations
+        public virtual bool IsPagingNeeded()
+        {
+            return true;
+        }
+
         // Body: main container for the report
-        public void BodyStart(Body b)
+        public virtual void BodyStart(Body b)
         {
         }
 
-        public void BodyEnd(Body b)
+        public virtual void BodyEnd(Body b)
         {
         }
 
-        public void PageHeaderStart(PageHeader ph)
+        public virtual void PageHeaderStart(PageHeader ph)
         {
         }
 
-        public void PageHeaderEnd(PageHeader ph)
+        public virtual void PageHeaderEnd(PageHeader ph)
         {
         }
 
-        public void PageFooterStart(PageFooter pf)
+        public virtual void PageFooterStart(PageFooter pf)
         {
         }
 
-        public void PageFooterEnd(PageFooter pf)
+        public virtual void PageFooterEnd(PageFooter pf)
         {
         }
 
-        public void Textbox(Textbox tb, string t, Row row)
+        public virtual void Textbox(Textbox tb, string t, Row row)
         {
         }
 
-        public void DataRegionNoRows(DataRegion d, string noRowsMsg)
+        public virtual void DataRegionNoRows(DataRegion d, string noRowsMsg)
         {
         }
 
         // Lists
-        public bool ListStart(List l, Row r)
+        public virtual bool ListStart(List l, Row r)
         {
             return true;
         }
 
-        public void ListEnd(List l, Row r)
+        public virtual void ListEnd(List l, Row r)
         {
         }
 
-        public void ListEntryBegin(List l, Row r)
+        public virtual void ListEntryBegin(List l, Row r)
         {
         }
 
-        public void ListEntryEnd(List l, Row r)
+        public virtual void ListEntryEnd(List l, Row r)
         {
         }
 
         // Tables					// Report item table
-        public bool TableStart(Table t, Row row)
+        public virtual bool TableStart(Table t, Row row)
         {
             return true;
         }
 
-        public void TableEnd(Table t, Row row)
+        public virtual void TableEnd(Table t, Row row)
         {
         }
 
-        public void TableBodyStart(Table t, Row row)
+        public virtual void TableBodyStart(Table t, Row row)
         {
         }
 
-        public void TableBodyEnd(Table t, Row row)
+        public  virtual void TableBodyEnd(Table t, Row row)
         {
         }
 
-        public void TableFooterStart(Footer f, Row row)
+        public virtual void TableFooterStart(Footer f, Row row)
         {
         }
 
-        public void TableFooterEnd(Footer f, Row row)
+        public virtual void TableFooterEnd(Footer f, Row row)
         {
         }
 
-        public void TableHeaderStart(Header h, Row row)
+        public virtual void TableHeaderStart(Header h, Row row)
         {
         }
 
-        public void TableHeaderEnd(Header h, Row row)
+        public virtual void TableHeaderEnd(Header h, Row row)
         {
         }
 
-        public void TableRowStart(TableRow tr, Row row)
+        public virtual void TableRowStart(TableRow tr, Row row)
         {
         }
 
-        public void TableRowEnd(TableRow tr, Row row)
+        public virtual void TableRowEnd(TableRow tr, Row row)
         {
         }
 
-        public void TableCellStart(TableCell t, Row row)
-        {
-            return;
-        }
-
-        public void TableCellEnd(TableCell t, Row row)
+        public virtual void TableCellStart(TableCell t, Row row)
         {
             return;
         }
 
-        public bool MatrixStart(Matrix m, MatrixCellEntry[,] matrix, Row r, int headerRows, int maxRows, int maxCols)				// called first
+        public virtual void TableCellEnd(TableCell t, Row row)
+        {
+            return;
+        }
+
+        public virtual bool MatrixStart(Matrix m, MatrixCellEntry[,] matrix, Row r, int headerRows, int maxRows, int maxCols)				// called first
         {
             return true;
         }
 
-        public void MatrixColumns(Matrix m, MatrixColumns mc)	// called just after MatrixStart
+        public virtual void MatrixColumns(Matrix m, MatrixColumns mc)	// called just after MatrixStart
         {
         }
 
-        public void MatrixCellStart(Matrix m, ReportItem ri, int row, int column, Row r, float h, float w, int colSpan)
+        public virtual void MatrixCellStart(Matrix m, ReportItem ri, int row, int column, Row r, float h, float w, int colSpan)
         {
         }
 
-        public void MatrixCellEnd(Matrix m, ReportItem ri, int row, int column, Row r)
+        public virtual void MatrixCellEnd(Matrix m, ReportItem ri, int row, int column, Row r)
         {
         }
 
-        public void MatrixRowStart(Matrix m, int row, Row r)
+        public virtual void MatrixRowStart(Matrix m, int row, Row r)
         {
         }
 
-        public void MatrixRowEnd(Matrix m, int row, Row r)
+        public virtual void MatrixRowEnd(Matrix m, int row, Row r)
         {
         }
 
-        public void MatrixEnd(Matrix m, Row r)				// called last
+        public virtual void MatrixEnd(Matrix m, Row r)				// called last
         {
         }
 
-        public void Chart(Chart c, Row r, ChartBase cb)
+        public virtual void Chart(Chart c, Row r, ChartBase cb)
         {
         }
 
-        public void Image(fyiReporting.RDL.Image i, Row r, string mimeType, Stream ior)
+        public virtual void Image(fyiReporting.RDL.Image i, Row r, string mimeType, Stream ior)
         {
         }
 
-        public void Line(Line l, Row r)
+        public virtual void Line(Line l, Row r)
         {
             return;
         }
 
-        public bool RectangleStart(fyiReporting.RDL.Rectangle rect, Row r)
+        public virtual bool RectangleStart(fyiReporting.RDL.Rectangle rect, Row r)
         {
             return true;
         }
 
-        public void RectangleEnd(fyiReporting.RDL.Rectangle rect, Row r)
+        public virtual void RectangleEnd(fyiReporting.RDL.Rectangle rect, Row r)
         {
         }
 
-        public void Subreport(Subreport s, Row r)
+        public virtual void Subreport(Subreport s, Row r)
         {
         }
 
-        public void GroupingStart(Grouping g)			// called at start of grouping
+        public virtual void GroupingStart(Grouping g)			// called at start of grouping
         {
         }
-        public void GroupingInstanceStart(Grouping g)	// called at start for each grouping instance
+        public virtual void GroupingInstanceStart(Grouping g)	// called at start for each grouping instance
         {
         }
-        public void GroupingInstanceEnd(Grouping g)	// called at start for each grouping instance
+        public virtual void GroupingInstanceEnd(Grouping g)	// called at start for each grouping instance
         {
         }
-        public void GroupingEnd(Grouping g)			// called at end of grouping
+        public virtual void GroupingEnd(Grouping g)			// called at end of grouping
         {
         }
+
+        #endregion
     }
 }

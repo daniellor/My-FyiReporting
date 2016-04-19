@@ -321,7 +321,86 @@ namespace fyiReporting.RDL
             }
 
         }
+        public  Worksheet GetWorksheet(SpreadsheetDocument document, string worksheetName)
+        {
+            IEnumerable<Sheet> sheets = document.WorkbookPart.Workbook.Descendants<Sheet>().Where(s => s.Name == worksheetName);
+            WorksheetPart worksheetPart = (WorksheetPart)document.WorkbookPart.GetPartById(sheets.First().Id);
+            if (sheets.Count() == 0)
+                return null;
+            else
+                return worksheetPart.Worksheet;
+        }
+        /// <summary>  
+        /// This method will merge two cells  
+        /// </summary>  
+        /// <param name="sheetName">Instance of the worksheet</param>  
+        /// <param name="cell1Name">Cell 1 Name</param>  
+        /// <param name="cell2Name">Cell 2 Name</param>  
+        public  void MergeCells(Worksheet sheetName, string cellRange)
+        {
+            // Open the document for editing.  
 
+            Worksheet worksheet = sheetName;
+            if (worksheet == null || string.IsNullOrEmpty(cellRange) )
+            {
+                return;
+            }
+
+            
+            MergeCells mergeCells;
+            if (worksheet.Elements<MergeCells>().Any())
+            {
+                mergeCells = worksheet.Elements<MergeCells>().First();
+            }
+            else
+            {
+                mergeCells = new MergeCells();
+
+                // Insert a MergeCells object into the specified position.  
+                if (worksheet.Elements<CustomSheetView>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<CustomSheetView>().First());
+                }
+                else if (worksheet.Elements<DataConsolidate>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<DataConsolidate>().First());
+                }
+                else if (worksheet.Elements<SortState>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SortState>().First());
+                }
+                else if (worksheet.Elements<AutoFilter>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<AutoFilter>().First());
+                }
+                else if (worksheet.Elements<Scenarios>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<Scenarios>().First());
+                }
+                else if (worksheet.Elements<ProtectedRanges>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<ProtectedRanges>().First());
+                }
+                else if (worksheet.Elements<SheetProtection>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SheetProtection>().First());
+                }
+                else if (worksheet.Elements<SheetCalculationProperties>().Any())
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SheetCalculationProperties>().First());
+                }
+                else
+                {
+                    worksheet.InsertAfter(mergeCells, worksheet.Elements<SheetData>().First());
+                }
+            }
+
+            // Create the merged cell and append it to the MergeCells collection.  
+            MergeCell mergeCell = new MergeCell() { Reference = new StringValue(cellRange), };
+            mergeCells.Append(mergeCell);
+
+            worksheet.Save();
+        }
 
 
 
