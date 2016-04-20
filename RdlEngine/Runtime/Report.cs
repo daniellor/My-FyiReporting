@@ -222,10 +222,6 @@ namespace fyiReporting.RDL
                     ip = new RenderExcel(this, sg);
                     _Report.Run(ip);
                     break;
-                case OutputPresentationType.RenderSpreadSheetDocument_OpenXmlSdk:
-                    ip = new RenderSpreadSheetDocument_OpenXmlSdk(this, sg);
-                    _Report.Run(ip);
-                    break;
                 case OutputPresentationType.RenderSpreadSheetDocument_EPPlus:
                     ip = new RenderSpreadSheetDocument_EPPlus(this, sg);
                     _Report.Run(ip);

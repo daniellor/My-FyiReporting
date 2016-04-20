@@ -136,7 +136,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="RenderHtmlTests.cs" />
     <Compile Include="RenderSpreadSheet_EPPlusTests.cs" />
-    <Compile Include="RenderSpreadSheet_OXSdkTests.cs" />
     <Compile Include="Utils\GeneralUtils.cs" />
     <Compile Include="Utils\OpenXmlUtils.cs" />
     <Compile Include="Utils\RandomDateTime.cs" />

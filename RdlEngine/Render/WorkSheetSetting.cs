@@ -8,7 +8,6 @@ namespace RdlEngine.Render
 {
     internal class WorkSheetSetting
     {
-        public string WorksheetName;
         public ExcelWorksheet WorkSheet;
 
         public float? LastPixelsY;
@@ -19,20 +18,12 @@ namespace RdlEngine.Render
 
         public WorkSheetSetting(ExcelWorksheet excelWorkSheet)
         {
-            // WorksheetName = worksheetName;
             WorkSheet = excelWorkSheet;
             StartCol();
             StartRow();
             MergeCells = new List<string>();
         }
-        public WorkSheetSetting(string excelWorkSheetName)
-        {
-            WorksheetName = excelWorkSheetName;
-            StartCol();
-            StartRow();
-            MergeCells = new List<string>();
-        }
-
+       
 
         public int NextCol()
         {
