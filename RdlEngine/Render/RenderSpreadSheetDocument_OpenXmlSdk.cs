@@ -45,6 +45,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using System.Linq;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using RdlEngine.Render;
 
 namespace fyiReporting.RDL
 {
@@ -430,48 +431,5 @@ namespace fyiReporting.RDL
 
     }
 
-    internal class WorkSheetSetting
-    {
-        public string WorksheetName;
-        public int CurrentRow { get; private set; }
-        public int CurrentCol { get; private set; }
-
-        public List<string> MergeCells;
-
-        public WorkSheetSetting(string worksheetName)
-        {
-            WorksheetName = worksheetName;
-            StartCol();
-            StartRow();
-            MergeCells = new List<string>();
-        }
-
-
-        public int NextCol()
-        {
-            return CurrentCol++;
-        }
-        public int NextCol(int increment)
-        {
-            return CurrentCol+increment;
-        }
-        public int StartCol()
-        {
-            return CurrentCol= -1;
-        }
-        public int StartRow()
-        {
-            return CurrentRow = -1;
-        }
-        public int NextRow()
-        {
-            return CurrentRow++;
-        }
-        public int NextRow(int increment)
-        {
-            return CurrentRow+increment;
-        }
-
-
-    }
+   
 }
